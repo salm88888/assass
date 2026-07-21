@@ -41,6 +41,7 @@ jobs:
           wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -O /tmp/gradle.zip
           sudo unzip -q /tmp/gradle.zip -d /opt/gradle
           echo "/opt/gradle/gradle-${GRADLE_VERSION}/bin" >> $GITHUB_PATH
+          echo "GRADLE_HOME=/opt/gradle/gradle-${GRADLE_VERSION}" >> $GITHUB_ENV
 
       - name: Generate Gradle wrapper (if missing)
         run: |
@@ -52,7 +53,12 @@ jobs:
       - name: Build debug APK
         env:
           JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
-        run: gradle assembleDebug --no-daemon
+          GRADLE_HOME: ${{ env.GRADLE_HOME }}
+        run: |
+          echo "Using JAVA_HOME=$JAVA_HOME"
+          echo "Using GRADLE_HOME=$GRADLE_HOME"
+          $GRADLE_HOME/bin/gradle --version
+          $GRADLE_HOME/bin/gradle assembleDebug --no-daemon --stacktrace
         working-directory: ./
 
       - name: Upload APK artifact
