@@ -48,7 +48,7 @@ jobs:
           fi
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon
+        run: gradle assembleDebug --no-daemon
         working-directory: ./
 
       - name: Upload APK artifact
