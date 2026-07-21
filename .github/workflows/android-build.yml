@@ -50,15 +50,21 @@ jobs:
             gradle wrapper --gradle-version 7.5.1 --distribution-type bin
           fi
 
-      - name: Build debug APK
+      - name: Build debug APK (diagnostics)
         env:
           JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
           GRADLE_HOME: ${{ env.GRADLE_HOME }}
         run: |
-          echo "Using JAVA_HOME=$JAVA_HOME"
-          echo "Using GRADLE_HOME=$GRADLE_HOME"
-          $GRADLE_HOME/bin/gradle --version
-          $GRADLE_HOME/bin/gradle assembleDebug --no-daemon --stacktrace
+          echo "PWD: $(pwd)"
+          echo "Listing repo root:"; ls -la
+          echo "Listing android-app/ and android-app/app/"; ls -la android-app || true; ls -la android-app/app || true
+          echo "Find any gradle-wrapper.properties:"; find . -maxdepth 4 -name gradle-wrapper.properties -print || true
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "Which gradle:"; which gradle || true
+          echo "GRADLE_HOME=$GRADLE_HOME"
+          echo "GRADLE binary version:"; if [ -n "$GRADLE_HOME" ]; then $GRADLE_HOME/bin/gradle --version; fi
+          echo "Running gradle assemble with explicit org.gradle.java.home pointing to JAVA_HOME"
+          if [ -n "$GRADLE_HOME" ]; then $GRADLE_HOME/bin/gradle assembleDebug --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" --stacktrace; else gradle assembleDebug --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" --stacktrace; fi
         working-directory: ./
 
       - name: Upload APK artifact
